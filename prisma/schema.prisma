@@ -34,32 +34,25 @@ model Carrier {
 }
 
 model Country {
-  id       Int        @id @default(autoincrement())
-  code     String     @unique
-  Shipment Shipment[]
-  Shipment Shipment[]
-  Shipment Shipment[]
+  id            Int        @id @default(autoincrement())
+  code          String     @unique
+  shipmentsFrom Shipment[] @relation("FromCountry")
+  shipmentsTo   Shipment[] @relation("ToCountry")
+  Shipment      Shipment[]
 }
 
 model Shipment {
-  id            Int        @id @default(autoincrement())
+  id            Int    @id @default(autoincrement())
   fromCountryId Int
   toCountryId   Int
   zipcode       String
   flow          String
+  ldmRates      Json
   carrierId     Int
-  ldmValues     LDMValue[]
-  fromCountry   Country    @relation("FromCountry", fields: [fromCountryId], references: [id])
-  toCountry     Country    @relation("ToCountry", fields: [toCountryId], references: [id])
-  carrier       Carrier    @relation(fields: [carrierId], references: [id])
-  Country       Country?   @relation(fields: [countryId], references: [id])
-  countryId     Int?
-}
 
-model LDMValue {
-  id         Int      @id @default(autoincrement())
-  shipmentId Int
-  ldm        Float
-  rate       Float
-  shipment   Shipment @relation(fields: [shipmentId], references: [id])
+  fromCountry Country  @relation("FromCountry", fields: [fromCountryId], references: [id])
+  toCountry   Country  @relation("ToCountry", fields: [toCountryId], references: [id])
+  carrier     Carrier  @relation(fields: [carrierId], references: [id])
+  Country     Country? @relation(fields: [countryId], references: [id])
+  countryId   Int?
 }
