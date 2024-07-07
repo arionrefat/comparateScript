@@ -13,14 +13,12 @@ interface Shipment {
 }
 
 async function main() {
-  // Read the CSV file
-  fs.readFile("./DSV - DSV - Sheet1.csv", "utf8", async (err, csvString) => {
-    if (err) {
-      console.error("Error reading CSV file:", err);
-      return;
-    }
+  try {
+    const csvString = fs.readFileSync(
+      "./Rabelink Transport - Frankrijk.csv",
+      "utf8",
+    );
 
-    // Parse CSV
     Papa.parse(csvString, {
       header: true,
       dynamicTyping: true,
@@ -32,32 +30,75 @@ async function main() {
             if (key.startsWith("LDM-")) {
               const ldmValue = parseFloat(key.replace("LDM-", ""));
               ldmRates[ldmValue] = parseFloat(
-                (row[key] || "0").replace(",", "."),
+                (row[key] || "0").replace("€", "").replace(",", "."),
               );
             }
           }
 
-          const shipment: Shipment = {
-            fromCountryCode: row["Zone \n Netherlands"],
+          return {
+            fromCountryCode: row["Zone Netherlands"],
             toCountryCode: row["Country"],
-            zipcode: row["ZIP"],
+            zipcode: String(row["ZIP"]),
             flow: row["Flow"],
             ldmRates: ldmRates,
           };
-
-          return shipment;
         });
+
+        for (const shipment of shipments) {
+          if (!shipment.fromCountryCode || !shipment.toCountryCode) {
+            console.warn("Missing country code in shipment:", shipment);
+            continue; // Skip this shipment if country codes are missing
+          }
+
+          // Find or create the from country
+          let fromCountry = await prisma.country.findUnique({
+            where: { code: shipment.fromCountryCode },
+          });
+          if (!fromCountry) {
+            fromCountry = await prisma.country.create({
+              data: { code: shipment.fromCountryCode },
+            });
+          }
+
+          // Find or create the to country
+          let toCountry = await prisma.country.findUnique({
+            where: { code: shipment.toCountryCode },
+          });
+          if (!toCountry) {
+            toCountry = await prisma.country.create({
+              data: { code: shipment.toCountryCode },
+            });
+          }
+
+          // Create the shipment
+          await prisma.shipment.create({
+            data: {
+              fromCountry: {
+                connect: { id: fromCountry.id },
+              },
+              toCountry: {
+                connect: { id: toCountry.id },
+              },
+              zipcode: shipment.zipcode,
+              flow: shipment.flow,
+              ldmRates: shipment.ldmRates,
+              carrier: {
+                connect: { name: "Rabelink" }, // Change this to the appropriate carrier name if needed
+              },
+            },
+          });
+        }
       },
     });
-  });
+  } catch (err) {
+    console.error("Error reading CSV file:", err);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+main().catch((e) => {
+  console.error(e);
+  prisma.$disconnect();
+  process.exit(1);
+});
