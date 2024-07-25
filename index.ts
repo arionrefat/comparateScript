@@ -14,10 +14,7 @@ interface Shipment {
 
 async function main() {
   try {
-    const csvString = fs.readFileSync(
-      "./Rabelink Transport - Frankrijk.csv",
-      "utf8",
-    );
+    const csvString = fs.readFileSync("./Drost import AT - Sheet1.csv", "utf8");
 
     Papa.parse(csvString, {
       header: true,
@@ -43,6 +40,16 @@ async function main() {
             ldmRates: ldmRates,
           };
         });
+
+        // Ensure the Carrier exists
+        let carrier = await prisma.carrier.findUnique({
+          where: { name: "Drost" }, // Change this to the appropriate carrier name if needed
+        });
+        if (!carrier) {
+          carrier = await prisma.carrier.create({
+            data: { name: "Drost" },
+          });
+        }
 
         for (const shipment of shipments) {
           if (!shipment.fromCountryCode || !shipment.toCountryCode) {
@@ -83,7 +90,7 @@ async function main() {
               flow: shipment.flow,
               ldmRates: shipment.ldmRates,
               carrier: {
-                connect: { name: "Rabelink" }, // Change this to the appropriate carrier name if needed
+                connect: { id: carrier.id },
               },
             },
           });
