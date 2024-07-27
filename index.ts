@@ -14,7 +14,7 @@ interface Shipment {
 
 async function main() {
   try {
-    const csvString = fs.readFileSync("./rabelink CH.csv", "utf8");
+    const csvString = fs.readFileSync("./Raben.csv", "utf8");
 
     Papa.parse(csvString, {
       header: true,
@@ -43,11 +43,11 @@ async function main() {
 
         // Ensure the Carrier exists
         let carrier = await prisma.carrier.findUnique({
-          where: { name: "Rabelink" }, // Change this to the appropriate carrier name if needed
+          where: { name: "Raben" }, // Change this to the appropriate carrier name if needed
         });
         if (!carrier) {
           carrier = await prisma.carrier.create({
-            data: { name: "Rabelink" },
+            data: { name: "Raben" },
           });
         }
 
