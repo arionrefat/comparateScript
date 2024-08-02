@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Carrier" ADD COLUMN     "maxHeightPerLDM" INTEGER NOT NULL DEFAULT 0;

@@ -39,6 +39,7 @@ model Carrier {
   name                    CarrierName @unique
   shipments               Shipment[]
   maxWeightPerLDM         Int         @default(0)
+  maxHeightPerLDM         Int         @default(0)
   fuelSurchargePercentage Int         @default(0)
 }
 
