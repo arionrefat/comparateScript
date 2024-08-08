@@ -32,6 +32,7 @@ enum CarrierName {
   Alles
   Tarieven
   Dimetra
+  Rhenus
 }
 
 model Carrier {
