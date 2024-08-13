@@ -14,10 +14,7 @@ interface Shipment {
 
 async function main() {
   try {
-    const csvString = fs.readFileSync(
-      "./Thomas Boers import upload - Sheet1.csv",
-      "utf8",
-    );
+    const csvString = fs.readFileSync("./Van dijken NO.csv", "utf8");
 
     Papa.parse(csvString, {
       header: true,
@@ -26,22 +23,13 @@ async function main() {
         const shipments: Shipment[] = results.data.map((row: any) => {
           const ldmRates: { [key: number]: number } = {};
 
-          // for (const key in row) {
-          //   if (key.startsWith("LDM-")) {
-          //     const ldmValue = parseFloat(key.replace("LDM-", ""));
-          //     ldmRates[ldmValue] = parseFloat(
-          //       (row[key] || "0").replace("€", "").replace(",", "."),
-          //     );
-          //   }
-          // }
-
           for (const key in row) {
             if (key.startsWith("LDM-")) {
               const ldmValue = parseFloat(key.replace("LDM-", ""));
               let value = row[key];
 
               if (typeof value === "string") {
-                value = value.replace("€", "").replace(",", ".");
+                value = value.replace("€", "");
               }
 
               ldmRates[ldmValue] = parseFloat(value || "0");
@@ -59,11 +47,11 @@ async function main() {
 
         // Ensure the Carrier exists
         let carrier = await prisma.carrier.findUnique({
-          where: { name: "ThomasBoers" }, // Change this to the appropriate carrier name if needed
+          where: { name: "VanDijken" }, // Change this to the appropriate carrier name if needed
         });
         if (!carrier) {
           carrier = await prisma.carrier.create({
-            data: { name: "ThomasBoers" },
+            data: { name: "VanDijken" },
           });
         }
 
