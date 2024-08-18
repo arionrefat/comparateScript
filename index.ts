@@ -14,7 +14,7 @@ interface Shipment {
 
 async function main() {
   try {
-    const csvString = fs.readFileSync("./Van dijken NO.csv", "utf8");
+    const csvString = fs.readFileSync("./Van dijken import SWE -.csv", "utf8");
 
     Papa.parse(csvString, {
       header: true,

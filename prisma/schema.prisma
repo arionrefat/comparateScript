@@ -33,6 +33,7 @@ enum CarrierName {
   Tarieven
   Dimetra
   Rhenus
+  TarievenEasy
 }
 
 model Carrier {
