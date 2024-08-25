@@ -30,9 +30,11 @@ enum CarrierName {
   Leodejong
   Kingsrod
   Alles
-  Tarieven
+  TarievenDeWit
+  TarievenElst
   Dimetra
   Rhenus
+  Heppner
   TarievenEasy
 }
 
